@@ -1,5 +1,5 @@
-<!-- 파일명: dual_memo_dark_highlight.html -->
-<!-- 프로젝트명: dual_memo_page_advanced -->
+<!-- 파일명: dual_memo_complete.html -->
+<!-- 프로젝트명: dual_memo_page_complete -->
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -9,27 +9,26 @@
   <title>듀얼 메모장</title>
   <style>
     :root {
-      --bg: #f4f6f8;
+      --bg: #f3f4f6;
       --panel: #ffffff;
-      --panel-2: #eef2f6;
-      --text: #1f2937;
+      --panel-2: #f8fafc;
+      --text: #111827;
       --sub: #6b7280;
       --border: #d1d5db;
       --accent: #2563eb;
       --highlight: #fff59d;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     }
 
     body.dark {
       --bg: #111827;
       --panel: #1f2937;
-      --panel-2: #111827;
+      --panel-2: #0f172a;
       --text: #f3f4f6;
       --sub: #9ca3af;
       --border: #374151;
       --accent: #60a5fa;
-      --highlight: #8b7a00;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     }
 
     * {
@@ -45,12 +44,16 @@
       color: var(--text);
     }
 
+    body {
+      overflow: hidden;
+    }
+
     .app {
       height: 100vh;
       display: flex;
       flex-direction: column;
-      padding: 16px;
       gap: 12px;
+      padding: 16px;
     }
 
     .topbar {
@@ -58,19 +61,18 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 12px 14px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: var(--shadow);
       flex-wrap: wrap;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
     }
 
-    .topbar-left {
+    .title-area {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .title {
@@ -78,53 +80,33 @@
       font-weight: 700;
     }
 
-    .sub {
-      color: var(--sub);
+    .subtitle {
       font-size: 13px;
+      color: var(--sub);
     }
 
-    .topbar-right {
+    .topbar-controls {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
 
-    select,
-    button,
-    input[type="color"] {
-      height: 36px;
-      border: 1px solid var(--border);
-      background: var(--panel-2);
-      color: var(--text);
-      border-radius: 8px;
-      padding: 0 10px;
-      font-size: 14px;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:hover {
-      border-color: var(--accent);
-    }
-
     .memo-wrap {
       flex: 1;
+      min-height: 0;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      min-height: 0;
     }
 
     .memo-box {
       min-height: 0;
       display: flex;
       flex-direction: column;
-      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 14px;
+      background: var(--panel);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
@@ -134,10 +116,10 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
       background: var(--panel);
-      flex-wrap: wrap;
     }
 
     .memo-title {
@@ -152,22 +134,18 @@
       flex-wrap: wrap;
     }
 
-    .memo-tools label {
-      font-size: 13px;
-      color: var(--sub);
-    }
-
     .memo-editor {
       flex: 1;
       min-height: 0;
-      overflow: auto; /* 각각 독립 스크롤 */
+      overflow: auto;
       padding: 14px;
       outline: none;
-      color: var(--text);
-      background: var(--panel);
-      line-height: 1.6;
       white-space: pre-wrap;
       word-break: break-word;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--panel);
+      caret-color: var(--text);
     }
 
     .memo-editor:empty::before {
@@ -175,14 +153,12 @@
       color: var(--sub);
     }
 
-    .memo-editor mark {
-      background: var(--highlight);
-      color: inherit;
-      padding: 0.05em 0.12em;
-      border-radius: 3px;
-    }
-
     .memo-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
       padding: 8px 12px;
       border-top: 1px solid var(--border);
       color: var(--sub);
@@ -190,9 +166,62 @@
       background: var(--panel);
     }
 
-    @media (max-width: 900px) {
+    .count-badge {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    select,
+    button,
+    input[type="color"] {
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    label.inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--sub);
+      font-size: 13px;
+    }
+
+    mark {
+      background: var(--highlight);
+      color: inherit;
+      padding: 0.05em 0.12em;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 980px) {
       .memo-wrap {
         grid-template-columns: 1fr;
+      }
+
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .memo-box {
+        min-height: 420px;
       }
     }
   </style>
@@ -200,21 +229,22 @@
 <body>
   <div class="app">
     <div class="topbar">
-      <div class="topbar-left">
+      <div class="title-area">
         <div class="title">듀얼 메모장</div>
-        <div class="sub">테마 선택 / 개별 글자 크기 / 선택 영역 하이라이트 / 자동 저장</div>
+        <div class="subtitle">다크/라이트, 글자 크기, 하이라이트, 서식 제거, 글자수 자동 집계</div>
       </div>
 
-      <div class="topbar-right">
-        <label for="themeSelect">테마</label>
+      <div class="topbar-controls">
+        <label class="inline" for="themeSelect">테마</label>
         <select id="themeSelect">
           <option value="light">라이트</option>
           <option value="dark">다크</option>
         </select>
 
-        <label for="highlightColor">하이라이트 색</label>
+        <label class="inline" for="highlightColor">하이라이트</label>
         <input type="color" id="highlightColor" value="#fff59d" />
 
+        <span class="count-badge" id="totalCount">전체 글자수: 0</span>
         <button type="button" id="clearAllBtn">전체 초기화</button>
       </div>
     </div>
@@ -224,7 +254,7 @@
         <div class="memo-head">
           <div class="memo-title">메모장 1</div>
           <div class="memo-tools">
-            <label for="fontSize1">글자 크기</label>
+            <label class="inline" for="fontSize1">글자 크기</label>
             <select id="fontSize1">
               <option value="12">12px</option>
               <option value="14">14px</option>
@@ -234,8 +264,11 @@
               <option value="24">24px</option>
               <option value="28">28px</option>
             </select>
-            <button type="button" data-target="memo1" class="highlightBtn">하이라이트</button>
-            <button type="button" data-target="memo1" class="removeHighlightBtn">하이라이트 해제</button>
+
+            <button type="button" class="highlightBtn" data-target="memo1">하이라이트</button>
+            <button type="button" class="removeHighlightBtn" data-target="memo1">하이라이트 해제</button>
+            <button type="button" class="clearFormatBtn" data-target="memo1">선택 서식 제거</button>
+            <button type="button" class="clearAllFormatBtn" data-target="memo1">전체 서식 제거</button>
           </div>
         </div>
 
@@ -246,14 +279,17 @@
           data-placeholder="첫 번째 메모장을 입력하세요."
         ></div>
 
-        <div class="memo-footer">메모장 1</div>
+        <div class="memo-footer">
+          <span>메모장 1 독립 스크롤</span>
+          <span class="count-badge" id="count1">글자수: 0</span>
+        </div>
       </section>
 
       <section class="memo-box">
         <div class="memo-head">
           <div class="memo-title">메모장 2</div>
           <div class="memo-tools">
-            <label for="fontSize2">글자 크기</label>
+            <label class="inline" for="fontSize2">글자 크기</label>
             <select id="fontSize2">
               <option value="12">12px</option>
               <option value="14">14px</option>
@@ -263,8 +299,11 @@
               <option value="24">24px</option>
               <option value="28">28px</option>
             </select>
-            <button type="button" data-target="memo2" class="highlightBtn">하이라이트</button>
-            <button type="button" data-target="memo2" class="removeHighlightBtn">하이라이트 해제</button>
+
+            <button type="button" class="highlightBtn" data-target="memo2">하이라이트</button>
+            <button type="button" class="removeHighlightBtn" data-target="memo2">하이라이트 해제</button>
+            <button type="button" class="clearFormatBtn" data-target="memo2">선택 서식 제거</button>
+            <button type="button" class="clearAllFormatBtn" data-target="memo2">전체 서식 제거</button>
           </div>
         </div>
 
@@ -275,14 +314,17 @@
           data-placeholder="두 번째 메모장을 입력하세요."
         ></div>
 
-        <div class="memo-footer">메모장 2</div>
+        <div class="memo-footer">
+          <span>메모장 2 독립 스크롤</span>
+          <span class="count-badge" id="count2">글자수: 0</span>
+        </div>
       </section>
     </div>
   </div>
 
   <script>
-    // 파일명: dual_memo_dark_highlight.html
-    // 프로젝트명: dual_memo_page_advanced
+    // 파일명: dual_memo_complete.html
+    // 프로젝트명: dual_memo_page_complete
 
     const STORAGE_KEYS = {
       theme: "dualMemo_theme",
@@ -303,11 +345,46 @@
     const fontSize1 = document.getElementById("fontSize1");
     const fontSize2 = document.getElementById("fontSize2");
 
+    const count1 = document.getElementById("count1");
+    const count2 = document.getElementById("count2");
+    const totalCount = document.getElementById("totalCount");
+
     const highlightBtns = document.querySelectorAll(".highlightBtn");
     const removeHighlightBtns = document.querySelectorAll(".removeHighlightBtn");
+    const clearFormatBtns = document.querySelectorAll(".clearFormatBtn");
+    const clearAllFormatBtns = document.querySelectorAll(".clearAllFormatBtn");
 
     let savedRange = null;
     let activeEditor = null;
+
+    function applyTheme(theme) {
+      document.body.classList.toggle("dark", theme === "dark");
+    }
+
+    function applyFontSize(editor, size) {
+      editor.style.fontSize = size + "px";
+    }
+
+    function applyHighlightColor(color) {
+      document.documentElement.style.setProperty("--highlight", color);
+    }
+
+    function getPlainText(editor) {
+      return editor.innerText.replace(/\u00A0/g, " ");
+    }
+
+    function getCharCount(editor) {
+      return getPlainText(editor).length;
+    }
+
+    function updateCounts() {
+      const memo1Count = getCharCount(memo1);
+      const memo2Count = getCharCount(memo2);
+
+      count1.textContent = "글자수: " + memo1Count;
+      count2.textContent = "글자수: " + memo2Count;
+      totalCount.textContent = "전체 글자수: " + (memo1Count + memo2Count);
+    }
 
     function saveData() {
       localStorage.setItem(STORAGE_KEYS.memo1, memo1.innerHTML);
@@ -316,6 +393,7 @@
       localStorage.setItem(STORAGE_KEYS.fontSize2, fontSize2.value);
       localStorage.setItem(STORAGE_KEYS.theme, themeSelect.value);
       localStorage.setItem(STORAGE_KEYS.highlightColor, highlightColor.value);
+      updateCounts();
     }
 
     function loadData() {
@@ -339,24 +417,15 @@
       applyFontSize(memo1, savedFontSize1);
       applyFontSize(memo2, savedFontSize2);
       applyHighlightColor(savedHighlightColor);
-    }
-
-    function applyTheme(theme) {
-      document.body.classList.toggle("dark", theme === "dark");
-    }
-
-    function applyFontSize(editor, size) {
-      editor.style.fontSize = size + "px";
-    }
-
-    function applyHighlightColor(color) {
-      document.documentElement.style.setProperty("--highlight", color);
+      updateCounts();
     }
 
     function isSelectionInsideEditor(editor, range) {
       if (!range) return false;
-      const common = range.commonAncestorContainer;
-      return editor.contains(common.nodeType === 1 ? common : common.parentNode);
+      const node = range.commonAncestorContainer.nodeType === 1
+        ? range.commonAncestorContainer
+        : range.commonAncestorContainer.parentNode;
+      return editor.contains(node);
     }
 
     function saveSelection(editor) {
@@ -378,21 +447,37 @@
       return true;
     }
 
+    function insertPlainTextAtCursor(text) {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+
+      range.setStartAfter(textNode);
+      range.collapse(true);
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
     function highlightSelection(editorId) {
       const editor = document.getElementById(editorId);
 
-      if (activeEditor !== editor || !savedRange) {
-        editor.focus();
-      } else {
+      if (activeEditor === editor && savedRange) {
         restoreSelection();
+      } else {
+        editor.focus();
       }
 
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
 
       const range = selection.getRangeAt(0);
-      if (range.collapsed) return;
-      if (!isSelectionInsideEditor(editor, range)) return;
+      if (range.collapsed || !isSelectionInsideEditor(editor, range)) return;
 
       const mark = document.createElement("mark");
 
@@ -420,10 +505,10 @@
     function removeHighlight(editorId) {
       const editor = document.getElementById(editorId);
 
-      if (activeEditor !== editor || !savedRange) {
-        editor.focus();
-      } else {
+      if (activeEditor === editor && savedRange) {
         restoreSelection();
+      } else {
+        editor.focus();
       }
 
       const selection = window.getSelection();
@@ -437,17 +522,76 @@
         const markRange = document.createRange();
         markRange.selectNodeContents(mark);
 
-        const startsBeforeEnd =
-          range.compareBoundaryPoints(Range.END_TO_START, markRange) < 0;
-        const endsAfterStart =
+        const overlaps =
+          range.compareBoundaryPoints(Range.END_TO_START, markRange) < 0 &&
           range.compareBoundaryPoints(Range.START_TO_END, markRange) > 0;
 
-        if (startsBeforeEnd && endsAfterStart) {
+        if (overlaps) {
           unwrapMark(mark);
         }
       });
 
       saveData();
+    }
+
+    function clearSelectedFormatting(editorId) {
+      const editor = document.getElementById(editorId);
+
+      if (activeEditor === editor && savedRange) {
+        restoreSelection();
+      } else {
+        editor.focus();
+      }
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      if (!isSelectionInsideEditor(editor, range) || range.collapsed) return;
+
+      const plainText = range.toString();
+      range.deleteContents();
+
+      const textNode = document.createTextNode(plainText);
+      range.insertNode(textNode);
+
+      const newRange = document.createRange();
+      newRange.selectNodeContents(textNode);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      editor.normalize();
+      saveSelection(editor);
+      saveData();
+    }
+
+    function clearAllFormatting(editorId) {
+      const editor = document.getElementById(editorId);
+      const plainText = getPlainText(editor);
+      editor.textContent = plainText;
+      saveData();
+    }
+
+    function clearAllData() {
+      localStorage.removeItem(STORAGE_KEYS.memo1);
+      localStorage.removeItem(STORAGE_KEYS.memo2);
+      localStorage.removeItem(STORAGE_KEYS.fontSize1);
+      localStorage.removeItem(STORAGE_KEYS.fontSize2);
+      localStorage.removeItem(STORAGE_KEYS.theme);
+      localStorage.removeItem(STORAGE_KEYS.highlightColor);
+
+      memo1.innerHTML = "";
+      memo2.innerHTML = "";
+      fontSize1.value = "16";
+      fontSize2.value = "16";
+      themeSelect.value = "light";
+      highlightColor.value = "#fff59d";
+
+      applyTheme("light");
+      applyFontSize(memo1, "16");
+      applyFontSize(memo2, "16");
+      applyHighlightColor("#fff59d");
+      updateCounts();
     }
 
     [memo1, memo2].forEach((editor) => {
@@ -457,8 +601,21 @@
 
       editor.addEventListener("mouseup", () => saveSelection(editor));
       editor.addEventListener("keyup", () => saveSelection(editor));
-      editor.addEventListener("input", saveData);
+
+      editor.addEventListener("input", () => {
+        saveSelection(editor);
+        saveData();
+      });
+
       editor.addEventListener("blur", saveData);
+
+      editor.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text/plain");
+        insertPlainTextAtCursor(text);
+        saveSelection(editor);
+        saveData();
+      });
     });
 
     themeSelect.addEventListener("change", () => {
@@ -495,26 +652,20 @@
       });
     });
 
-    clearAllBtn.addEventListener("click", () => {
-      localStorage.removeItem(STORAGE_KEYS.memo1);
-      localStorage.removeItem(STORAGE_KEYS.memo2);
-      localStorage.removeItem(STORAGE_KEYS.fontSize1);
-      localStorage.removeItem(STORAGE_KEYS.fontSize2);
-      localStorage.removeItem(STORAGE_KEYS.theme);
-      localStorage.removeItem(STORAGE_KEYS.highlightColor);
-
-      memo1.innerHTML = "";
-      memo2.innerHTML = "";
-      fontSize1.value = "16";
-      fontSize2.value = "16";
-      themeSelect.value = "light";
-      highlightColor.value = "#fff59d";
-
-      applyTheme("light");
-      applyFontSize(memo1, "16");
-      applyFontSize(memo2, "16");
-      applyHighlightColor("#fff59d");
+    clearFormatBtns.forEach((btn) => {
+      btn.addEventListener("mousedown", (e) => e.preventDefault());
+      btn.addEventListener("click", () => {
+        clearSelectedFormatting(btn.dataset.target);
+      });
     });
+
+    clearAllFormatBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        clearAllFormatting(btn.dataset.target);
+      });
+    });
+
+    clearAllBtn.addEventListener("click", clearAllData);
 
     loadData();
   </script>
