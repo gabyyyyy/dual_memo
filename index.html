@@ -381,7 +381,6 @@
     let saveTimer = null;
     let hasPendingSave = false;
     let hasStorageError = false;
-    let pageExitFlushHandled = false;
 
     function applyTheme(theme) {
       document.body.classList.toggle("dark", theme === "dark");
@@ -460,7 +459,6 @@
 
     function scheduleSave() {
       hasPendingSave = true;
-      pageExitFlushHandled = false;
       setSaveStatus("저장 중…", "saving");
 
       if (saveTimer) {
@@ -494,15 +492,7 @@
     }
 
     function handlePageExit() {
-      if (pageExitFlushHandled) {
-        return;
-      }
-
-      pageExitFlushHandled = true;
       flushPendingSave();
-      window.setTimeout(() => {
-        pageExitFlushHandled = false;
-      }, 0);
     }
 
     function loadData() {
