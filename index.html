@@ -841,6 +841,8 @@
           }
         });
         hasStorageError = false;
+        hasPendingSave = false;
+        lastExitFlushVersion = -1;
         resetToDefaults();
         setSaveStatus("전체 초기화됨", "saved");
       } catch (error) {
@@ -874,7 +876,7 @@
       editor.addEventListener("paste", (e) => {
         e.preventDefault();
         const selection = window.getSelection();
-        const range = selection.rangeCount ? selection.getRangeAt(0) : null;
+        const range = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
         if (!isSelectionInsideEditor(editor, range)) {
           editor.focus();
           moveCursorToEditorEnd(editor);
