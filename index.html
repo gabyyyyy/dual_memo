@@ -933,7 +933,9 @@
     });
 
     clearAllBtn.addEventListener("click", clearAllData);
-    window.addEventListener("blur", flushPendingSave);
+    window.addEventListener("blur", () => {
+      window.setTimeout(handlePageExit, 0);
+    });
     window.addEventListener("pagehide", handlePageExit);
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
