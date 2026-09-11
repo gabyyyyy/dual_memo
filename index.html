@@ -418,12 +418,15 @@
       saveStatus.dataset.state = state;
     }
 
-    function getStorageErrorMessage(error, action) {
-      const prefix = action === "load" ? "불러오기 실패" : "저장 실패";
+    function getLoadStorageErrorMessage() {
+      return "불러오기 실패: 브라우저 저장소를 읽을 수 없습니다.";
+    }
+
+    function getSaveStorageErrorMessage(error) {
       if (error && (error.name === "QuotaExceededError" || error.name === "NS_ERROR_DOM_QUOTA_REACHED")) {
-        return prefix + ": 브라우저 저장 공간이 가득 찼습니다.";
+        return "저장 실패: 브라우저 저장 공간이 가득 찼습니다.";
       }
-      return prefix + ": 브라우저 저장소를 사용할 수 없습니다.";
+      return "저장 실패: 브라우저 저장소를 사용할 수 없습니다.";
     }
 
     function readStorage(key, fallbackValue) {
@@ -432,7 +435,7 @@
         return savedValue === null ? fallbackValue : savedValue;
       } catch (error) {
         hasStorageError = true;
-        setSaveStatus(getStorageErrorMessage(error, "load"), "error");
+        setSaveStatus(getLoadStorageErrorMessage(), "error");
         return fallbackValue;
       }
     }
@@ -450,7 +453,7 @@
         return true;
       } catch (error) {
         hasPendingSave = true;
-        setSaveStatus(getStorageErrorMessage(error, "save"), "error");
+        setSaveStatus(getSaveStorageErrorMessage(error), "error");
         return false;
       }
     }
@@ -497,6 +500,9 @@
 
       pageExitFlushHandled = true;
       flushPendingSave();
+      window.setTimeout(() => {
+        pageExitFlushHandled = false;
+      }, 0);
     }
 
     function loadData() {
@@ -719,7 +725,7 @@
         resetToDefaults();
         setSaveStatus("전체 초기화됨", "saved");
       } catch (error) {
-        setSaveStatus(getStorageErrorMessage(error, "save"), "error");
+        setSaveStatus(getSaveStorageErrorMessage(error), "error");
       }
     }
 
@@ -802,8 +808,6 @@
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
         handlePageExit();
-      } else if (document.visibilityState === "visible") {
-        pageExitFlushHandled = false;
       }
     });
 
