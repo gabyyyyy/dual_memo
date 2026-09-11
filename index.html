@@ -458,6 +458,12 @@
     }
 
     function scheduleSave() {
+      if (hasStorageError) {
+        hasPendingSave = false;
+        setSaveStatus(getLoadStorageErrorMessage(), "error");
+        return;
+      }
+
       hasPendingSave = true;
       setSaveStatus("저장 중…", "saving");
 
@@ -472,6 +478,11 @@
     }
 
     function flushPendingSave() {
+      if (hasStorageError) {
+        hasPendingSave = false;
+        return;
+      }
+
       if (saveTimer) {
         window.clearTimeout(saveTimer);
         saveTimer = null;
