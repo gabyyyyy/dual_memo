@@ -815,11 +815,14 @@
         return;
       }
 
-      flushPendingSave();
       let storageSnapshot = null;
 
       try {
         storageSnapshot = snapshotStorage();
+        flushPendingSave();
+        if (!hasPendingSave) {
+          storageSnapshot = snapshotStorage();
+        }
         Object.values(STORAGE_KEYS).forEach((key) => {
           const result = removeStorageValueSafely(key);
           if (!result.ok) {
