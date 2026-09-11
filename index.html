@@ -798,9 +798,6 @@
     clearAllBtn.addEventListener("click", clearAllData);
     window.addEventListener("beforeunload", handlePageExit);
     window.addEventListener("pagehide", handlePageExit);
-    window.addEventListener("pageshow", () => {
-      pageExitFlushHandled = false;
-    });
 
     loadData();
   </script>
