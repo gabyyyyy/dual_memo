@@ -447,10 +447,12 @@
         localStorage.setItem(STORAGE_KEYS.fontSize2, fontSize2.value);
         localStorage.setItem(STORAGE_KEYS.theme, themeSelect.value);
         localStorage.setItem(STORAGE_KEYS.highlightColor, highlightColor.value);
+        hasStorageError = false;
         hasPendingSave = false;
         setSaveStatus("저장됨", "saved");
         return true;
       } catch (error) {
+        hasStorageError = error.name === "SecurityError";
         hasPendingSave = true;
         setSaveStatus(getSaveStorageErrorMessage(error), "error");
         return false;
@@ -458,14 +460,10 @@
     }
 
     function scheduleSave() {
-      if (hasStorageError) {
-        hasPendingSave = false;
-        setSaveStatus(getLoadStorageErrorMessage(), "error");
-        return;
-      }
-
       hasPendingSave = true;
-      setSaveStatus("저장 중…", "saving");
+      if (!hasStorageError) {
+        setSaveStatus("저장 중…", "saving");
+      }
 
       if (saveTimer) {
         window.clearTimeout(saveTimer);
@@ -478,11 +476,6 @@
     }
 
     function flushPendingSave() {
-      if (hasStorageError) {
-        hasPendingSave = false;
-        return;
-      }
-
       if (saveTimer) {
         window.clearTimeout(saveTimer);
         saveTimer = null;
