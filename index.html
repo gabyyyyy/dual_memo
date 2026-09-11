@@ -934,7 +934,11 @@
 
     clearAllBtn.addEventListener("click", clearAllData);
     window.addEventListener("blur", () => {
-      window.setTimeout(handlePageExit, 0);
+      window.setTimeout(() => {
+        if (document.visibilityState === "hidden") {
+          handlePageExit();
+        }
+      }, 0);
     });
     window.addEventListener("pagehide", handlePageExit);
     document.addEventListener("visibilitychange", () => {
