@@ -488,20 +488,39 @@
       }
     }
 
+    function getCurrentStoragePayload() {
+      return {
+        [STORAGE_KEYS.memo1]: memo1.innerHTML,
+        [STORAGE_KEYS.memo2]: memo2.innerHTML,
+        [STORAGE_KEYS.fontSize1]: fontSize1.value,
+        [STORAGE_KEYS.fontSize2]: fontSize2.value,
+        [STORAGE_KEYS.theme]: themeSelect.value,
+        [STORAGE_KEYS.highlightColor]: highlightColor.value
+      };
+    }
+
     function persistData() {
+      let storageSnapshot = null;
+
       try {
-        localStorage.setItem(STORAGE_KEYS.memo1, memo1.innerHTML);
-        localStorage.setItem(STORAGE_KEYS.memo2, memo2.innerHTML);
-        localStorage.setItem(STORAGE_KEYS.fontSize1, fontSize1.value);
-        localStorage.setItem(STORAGE_KEYS.fontSize2, fontSize2.value);
-        localStorage.setItem(STORAGE_KEYS.theme, themeSelect.value);
-        localStorage.setItem(STORAGE_KEYS.highlightColor, highlightColor.value);
+        storageSnapshot = snapshotStorage();
+        Object.entries(getCurrentStoragePayload()).forEach(([key, value]) => {
+          const result = setStorageValueSafely(key, value);
+          if (!result.ok) {
+            throw result.error;
+          }
+        });
         hasStorageError = false;
         hasPendingSave = false;
         lastExitFlushVersion = -1;
         setSaveStatus("저장됨", "saved");
         return true;
       } catch (error) {
+        if (storageSnapshot) {
+          try {
+            restoreStorageSnapshot(storageSnapshot);
+          } catch (restoreError) {}
+        }
         hasStorageError = true;
         hasPendingSave = true;
         setSaveStatus(getSaveStorageErrorMessage(error), "error");
@@ -559,19 +578,21 @@
     }
 
     function restoreStorageSnapshot(snapshot) {
+      let restoreError = null;
+
       Object.values(STORAGE_KEYS).forEach((key) => {
         const result = snapshot[key] === null
           ? removeStorageValueSafely(key)
           : setStorageValueSafely(key, snapshot[key]);
 
         if (!result.ok) {
-          throw result.error;
-        }
-
-        if (snapshot[key] === null) {
-          return;
+          restoreError = restoreError || result.error;
         }
       });
+
+      if (restoreError) {
+        throw restoreError;
+      }
     }
 
     function loadData() {
