@@ -683,6 +683,7 @@
 
     function moveCursorToEditorEnd(editor) {
       const selection = window.getSelection();
+      if (!selection) return;
       const range = document.createRange();
       range.selectNodeContents(editor);
       range.collapse(false);
@@ -829,6 +830,7 @@
       try {
         flushPendingSave();
         if (hasPendingSave) {
+          setSaveStatus("저장 실패: 최신 내용을 저장하지 못해 전체 초기화를 취소했습니다.", "error");
           return;
         }
         storageSnapshot = snapshotStorage();
