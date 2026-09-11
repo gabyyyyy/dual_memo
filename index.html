@@ -381,7 +381,6 @@
     let saveTimer = null;
     let hasPendingSave = false;
     let hasStorageError = false;
-    let lastPageExitFlushTime = 0;
 
     function applyTheme(theme) {
       document.body.classList.toggle("dark", theme === "dark");
@@ -460,7 +459,6 @@
 
     function scheduleSave() {
       hasPendingSave = true;
-      lastPageExitFlushTime = 0;
       setSaveStatus("저장 중…", "saving");
 
       if (saveTimer) {
@@ -494,12 +492,6 @@
     }
 
     function handlePageExit() {
-      const now = Date.now();
-      if (now - lastPageExitFlushTime < 100) {
-        return;
-      }
-
-      lastPageExitFlushTime = now;
       flushPendingSave();
     }
 
@@ -801,8 +793,6 @@
     });
 
     clearAllBtn.addEventListener("click", clearAllData);
-    window.addEventListener("beforeunload", handlePageExit);
-    window.addEventListener("pagehide", handlePageExit);
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
         handlePageExit();
