@@ -381,6 +381,9 @@
     let saveTimer = null;
     let hasPendingSave = false;
     let hasStorageError = false;
+    let pendingSaveVersion = 0;
+    let lastExitFlushVersion = -1;
+    let exitFlushResetTimer = null;
 
     function applyTheme(theme) {
       document.body.classList.toggle("dark", theme === "dark");
@@ -461,6 +464,11 @@
 
     function scheduleSave() {
       hasPendingSave = true;
+      pendingSaveVersion += 1;
+      if (exitFlushResetTimer) {
+        window.clearTimeout(exitFlushResetTimer);
+        exitFlushResetTimer = null;
+      }
       if (!hasStorageError) {
         setSaveStatus("저장 중…", "saving");
       }
@@ -496,7 +504,36 @@
     }
 
     function handlePageExit() {
+      if (!hasPendingSave || lastExitFlushVersion === pendingSaveVersion) {
+        return;
+      }
+
+      lastExitFlushVersion = pendingSaveVersion;
       flushPendingSave();
+      if (exitFlushResetTimer) {
+        window.clearTimeout(exitFlushResetTimer);
+      }
+      exitFlushResetTimer = window.setTimeout(() => {
+        lastExitFlushVersion = -1;
+        exitFlushResetTimer = null;
+      }, 0);
+    }
+
+    function snapshotStorage() {
+      return Object.values(STORAGE_KEYS).reduce((snapshot, key) => {
+        snapshot[key] = localStorage.getItem(key);
+        return snapshot;
+      }, {});
+    }
+
+    function restoreStorageSnapshot(snapshot) {
+      Object.values(STORAGE_KEYS).forEach((key) => {
+        if (snapshot[key] === null) {
+          localStorage.removeItem(key);
+        } else {
+          localStorage.setItem(key, snapshot[key]);
+        }
+      });
     }
 
     function loadData() {
@@ -708,8 +745,10 @@
       }
 
       cancelPendingSave();
+      let storageSnapshot = null;
 
       try {
+        storageSnapshot = snapshotStorage();
         localStorage.removeItem(STORAGE_KEYS.memo1);
         localStorage.removeItem(STORAGE_KEYS.memo2);
         localStorage.removeItem(STORAGE_KEYS.fontSize1);
@@ -720,6 +759,11 @@
         resetToDefaults();
         setSaveStatus("전체 초기화됨", "saved");
       } catch (error) {
+        if (storageSnapshot) {
+          try {
+            restoreStorageSnapshot(storageSnapshot);
+          } catch (restoreError) {}
+        }
         loadData();
         hasStorageError = true;
         setSaveStatus(getSaveStorageErrorMessage(error), "error");
