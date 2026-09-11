@@ -383,7 +383,6 @@
     let hasStorageError = false;
     let pendingSaveVersion = 0;
     let lastExitFlushVersion = -1;
-    let exitFlushResetTimer = null;
 
     function applyTheme(theme) {
       document.body.classList.toggle("dark", theme === "dark");
@@ -442,6 +441,48 @@
       }
     }
 
+    function getStorageValueSafely(key) {
+      try {
+        return {
+          ok: true,
+          value: localStorage.getItem(key)
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error
+        };
+      }
+    }
+
+    function setStorageValueSafely(key, value) {
+      try {
+        localStorage.setItem(key, value);
+        return {
+          ok: true
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error
+        };
+      }
+    }
+
+    function removeStorageValueSafely(key) {
+      try {
+        localStorage.removeItem(key);
+        return {
+          ok: true
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error
+        };
+      }
+    }
+
     function persistData() {
       try {
         localStorage.setItem(STORAGE_KEYS.memo1, memo1.innerHTML);
@@ -452,6 +493,7 @@
         localStorage.setItem(STORAGE_KEYS.highlightColor, highlightColor.value);
         hasStorageError = false;
         hasPendingSave = false;
+        lastExitFlushVersion = -1;
         setSaveStatus("저장됨", "saved");
         return true;
       } catch (error) {
@@ -465,10 +507,7 @@
     function scheduleSave() {
       hasPendingSave = true;
       pendingSaveVersion += 1;
-      if (exitFlushResetTimer) {
-        window.clearTimeout(exitFlushResetTimer);
-        exitFlushResetTimer = null;
-      }
+      lastExitFlushVersion = -1;
       if (!hasStorageError) {
         setSaveStatus("저장 중…", "saving");
       }
@@ -510,28 +549,31 @@
 
       lastExitFlushVersion = pendingSaveVersion;
       flushPendingSave();
-      if (exitFlushResetTimer) {
-        window.clearTimeout(exitFlushResetTimer);
-      }
-      exitFlushResetTimer = window.setTimeout(() => {
-        lastExitFlushVersion = -1;
-        exitFlushResetTimer = null;
-      }, 0);
     }
 
     function snapshotStorage() {
       return Object.values(STORAGE_KEYS).reduce((snapshot, key) => {
-        snapshot[key] = localStorage.getItem(key);
+        const result = getStorageValueSafely(key);
+        if (!result.ok) {
+          throw result.error;
+        }
+        snapshot[key] = result.value;
         return snapshot;
       }, {});
     }
 
     function restoreStorageSnapshot(snapshot) {
       Object.values(STORAGE_KEYS).forEach((key) => {
+        const result = snapshot[key] === null
+          ? removeStorageValueSafely(key)
+          : setStorageValueSafely(key, snapshot[key]);
+
+        if (!result.ok) {
+          throw result.error;
+        }
+
         if (snapshot[key] === null) {
-          localStorage.removeItem(key);
-        } else {
-          localStorage.setItem(key, snapshot[key]);
+          return;
         }
       });
     }
