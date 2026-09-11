@@ -791,12 +791,12 @@
 
       try {
         storageSnapshot = snapshotStorage();
-        localStorage.removeItem(STORAGE_KEYS.memo1);
-        localStorage.removeItem(STORAGE_KEYS.memo2);
-        localStorage.removeItem(STORAGE_KEYS.fontSize1);
-        localStorage.removeItem(STORAGE_KEYS.fontSize2);
-        localStorage.removeItem(STORAGE_KEYS.theme);
-        localStorage.removeItem(STORAGE_KEYS.highlightColor);
+        Object.values(STORAGE_KEYS).forEach((key) => {
+          const result = removeStorageValueSafely(key);
+          if (!result.ok) {
+            throw result.error;
+          }
+        });
         hasStorageError = false;
         resetToDefaults();
         setSaveStatus("전체 초기화됨", "saved");
