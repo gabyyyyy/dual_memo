@@ -452,7 +452,7 @@
         setSaveStatus("저장됨", "saved");
         return true;
       } catch (error) {
-        hasStorageError = error.name === "SecurityError";
+        hasStorageError = true;
         hasPendingSave = true;
         setSaveStatus(getSaveStorageErrorMessage(error), "error");
         return false;
@@ -716,9 +716,12 @@
         localStorage.removeItem(STORAGE_KEYS.fontSize2);
         localStorage.removeItem(STORAGE_KEYS.theme);
         localStorage.removeItem(STORAGE_KEYS.highlightColor);
+        hasStorageError = false;
         resetToDefaults();
         setSaveStatus("전체 초기화됨", "saved");
       } catch (error) {
+        loadData();
+        hasStorageError = true;
         setSaveStatus(getSaveStorageErrorMessage(error), "error");
       }
     }
