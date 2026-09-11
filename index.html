@@ -681,6 +681,15 @@
       selection.addRange(range);
     }
 
+    function moveCursorToEditorEnd(editor) {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
     function highlightSelection(editorId) {
       const editor = document.getElementById(editorId);
 
@@ -816,13 +825,12 @@
       }
 
       let storageSnapshot = null;
+      let stableStorageSnapshot = null;
 
       try {
-        storageSnapshot = snapshotStorage();
+        stableStorageSnapshot = snapshotStorage();
         flushPendingSave();
-        if (!hasPendingSave) {
-          storageSnapshot = snapshotStorage();
-        }
+        storageSnapshot = hasPendingSave ? stableStorageSnapshot : snapshotStorage();
         Object.values(STORAGE_KEYS).forEach((key) => {
           const result = removeStorageValueSafely(key);
           if (!result.ok) {
@@ -862,6 +870,12 @@
 
       editor.addEventListener("paste", (e) => {
         e.preventDefault();
+        const selection = window.getSelection();
+        const range = selection.rangeCount ? selection.getRangeAt(0) : null;
+        if (!isSelectionInsideEditor(editor, range)) {
+          editor.focus();
+          moveCursorToEditorEnd(editor);
+        }
         const text = (e.clipboardData || window.clipboardData).getData("text/plain");
         insertPlainTextAtCursor(text);
         saveSelection(editor);
