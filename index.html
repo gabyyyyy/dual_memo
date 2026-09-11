@@ -441,6 +441,20 @@
       }
     }
 
+    function getStorageValueSafely(key) {
+      try {
+        return {
+          ok: true,
+          value: localStorage.getItem(key)
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error
+        };
+      }
+    }
+
     function setStorageValueSafely(key, value) {
       try {
         localStorage.setItem(key, value);
@@ -528,15 +542,15 @@
       flushPendingSave();
     }
 
-    function snapshotCurrentState() {
-      return {
-        [STORAGE_KEYS.memo1]: memo1.innerHTML,
-        [STORAGE_KEYS.memo2]: memo2.innerHTML,
-        [STORAGE_KEYS.fontSize1]: fontSize1.value,
-        [STORAGE_KEYS.fontSize2]: fontSize2.value,
-        [STORAGE_KEYS.theme]: themeSelect.value,
-        [STORAGE_KEYS.highlightColor]: highlightColor.value
-      };
+    function snapshotStorage() {
+      return Object.values(STORAGE_KEYS).reduce((snapshot, key) => {
+        const result = getStorageValueSafely(key);
+        if (!result.ok) {
+          throw result.error;
+        }
+        snapshot[key] = result.value;
+        return snapshot;
+      }, {});
     }
 
     function restoreStorageSnapshot(snapshot) {
@@ -767,7 +781,7 @@
       let storageSnapshot = null;
 
       try {
-        storageSnapshot = snapshotCurrentState();
+        storageSnapshot = snapshotStorage();
         Object.values(STORAGE_KEYS).forEach((key) => {
           const result = removeStorageValueSafely(key);
           if (!result.ok) {
