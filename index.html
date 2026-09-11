@@ -433,11 +433,16 @@
     function readStorage(key, fallbackValue) {
       try {
         const savedValue = localStorage.getItem(key);
-        return savedValue === null ? fallbackValue : savedValue;
+        return {
+          ok: true,
+          value: savedValue === null ? fallbackValue : savedValue
+        };
       } catch (error) {
-        hasStorageError = true;
-        setSaveStatus(getLoadStorageErrorMessage(), "error");
-        return fallbackValue;
+        return {
+          ok: false,
+          error,
+          value: fallbackValue
+        };
       }
     }
 
@@ -570,14 +575,22 @@
     }
 
     function loadData() {
-      hasStorageError = false;
+      let loadError = null;
 
-      const savedTheme = readStorage(STORAGE_KEYS.theme, "light");
-      const savedMemo1 = readStorage(STORAGE_KEYS.memo1, "");
-      const savedMemo2 = readStorage(STORAGE_KEYS.memo2, "");
-      const savedFontSize1 = readStorage(STORAGE_KEYS.fontSize1, "16");
-      const savedFontSize2 = readStorage(STORAGE_KEYS.fontSize2, "16");
-      const savedHighlightColor = readStorage(STORAGE_KEYS.highlightColor, "#fff59d");
+      function readOrFallback(key, fallbackValue) {
+        const result = readStorage(key, fallbackValue);
+        if (!result.ok && !loadError) {
+          loadError = result.error;
+        }
+        return result.value;
+      }
+
+      const savedTheme = readOrFallback(STORAGE_KEYS.theme, "light");
+      const savedMemo1 = readOrFallback(STORAGE_KEYS.memo1, "");
+      const savedMemo2 = readOrFallback(STORAGE_KEYS.memo2, "");
+      const savedFontSize1 = readOrFallback(STORAGE_KEYS.fontSize1, "16");
+      const savedFontSize2 = readOrFallback(STORAGE_KEYS.fontSize2, "16");
+      const savedHighlightColor = readOrFallback(STORAGE_KEYS.highlightColor, "#fff59d");
 
       themeSelect.value = savedTheme;
       highlightColor.value = savedHighlightColor;
@@ -594,7 +607,11 @@
       applyHighlightColor(savedHighlightColor);
       updateCounts();
 
-      if (!hasStorageError) {
+      hasStorageError = Boolean(loadError);
+
+      if (hasStorageError) {
+        setSaveStatus(getLoadStorageErrorMessage(), "error");
+      } else {
         setSaveStatus("저장됨", "saved");
       }
     }
