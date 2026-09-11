@@ -449,6 +449,7 @@
         setSaveStatus("저장됨", "saved");
         return true;
       } catch (error) {
+        hasPendingSave = true;
         setSaveStatus(getStorageErrorMessage(error, "save"), "error");
         return false;
       }
